@@ -1,26 +1,391 @@
-@import "tailwindcss";
+/* Import Geist Mono from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;300;400;500;700;900&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.6;
+  color: #333;
+  background: #fff;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 15px 0;
+}
+
+.header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.logo-text {
+  text-decoration: none;
+  color: #007bff;
+  transition: color 0.3s ease;
+}
+
+.logo-text:hover {
+  color: #0056b3;
+}
+
+.nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+.nav ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav ul li a:hover {
+  color: #007bff;
+}
+
+.cta-button {
+  background: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.cta-button:hover {
+  background: #0056b3;
+}
+
+.cta-button.secondary {
+  background: #6c757d;
+}
+
+.cta-button.secondary:hover {
+  background: #5a6268;
+}
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(rgba(0, 123, 255, 0.6), rgba(0, 196, 180, 0.6)),
+              url('https://images.unsplash.com/photo-1641648542439-6c002138dfdd?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center/cover;
+  color: #fff;
+  text-align: center;
+  padding: 140px 0;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3); /* Darker overlay for readability */
+  z-index: 0;
+}
+
+.hero .container {
+  z-index: 1;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.hero .subtitle {
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin-bottom: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.hero .cta-button {
+  font-size: 1.2rem;
+  padding: 14px 28px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Features Section */
+.features {
+  padding: 80px 0;
+  background: #f8f9fa;
+  text-align: center;
+}
+
+.features h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.feature-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.feature-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.feature-card p {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* About Section */
+.about {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.about h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.about p {
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 0 auto 30px;
+  color: #555;
+}
+
+/* Testimonials Section */
+.testimonials {
+  padding: 80px 0;
+  background: #f8f9fa;
+  text-align: center;
+}
+
+.testimonials h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.testimonial-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial-card p {
+  font-size: 1rem;
+  font-style: italic;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.testimonial-card h4 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #007bff;
+}
+
+/* CTA Section */
+.cta {
+  padding: 80px 0;
+  background: #007bff;
+  color: #fff;
+  text-align: center;
+}
+
+.cta h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cta p {
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta .cta-button {
+  font-size: 1.1rem;
+  padding: 12px 24px;
+}
+
+/* Footer */
+.footer {
+  background: #333;
+  color: #fff;
+  padding: 50px 0 20px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.footer-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.footer-section p,
+.footer-section ul li {
+  font-size: 0.9rem;
+}
+
+.footer-section ul {
+  list-style: none;
+}
+
+.footer-section ul li a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+  color: #00c4b4;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header .container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .nav ul {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav ul li {
+    margin-left: 0;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .hero {
+    padding: 100px 0;
+    min-height: 450px;
+  }
+
+  .hero h1 {
+    font-size: 2.2rem;
+  }
+
+  .hero .subtitle {
+    font-size: 1.1rem;
+  }
+
+  .features h2,
+  .about h2,
+  .testimonials h2,
+  .cta h2 {
+    font-size: 2rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .hero .subtitle {
+    font-size: 1rem;
+  }
+
+  .hero .cta-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+
+  .cta .cta-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
 }

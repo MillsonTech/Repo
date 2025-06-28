@@ -1,103 +1,215 @@
-import Image from "next/image";
+import Head from 'next/head';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <>
+      <Head>
+        <title>Milson Response - Disaster Response Coordination Platform</title>
+        <meta
+          name="description"
+          content="Milson Response empowers disaster response with real-time coordination, resource tracking, and communication for emergency services, volunteers, and communities."
         />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Header */}
+      <header className="header">
+        <div className="container">
+          <div className="logo">
+            <Link href="/" className="logo-text">
+              Milson Response
+            </Link>
+          </div>
+          <nav className="nav">
+            <ul>
+              <li><Link href="#home">Home</Link></li>
+              <li><Link href="#features">Features</Link></li>
+              <li><Link href="#about">About</Link></li>
+              <li><Link href="#testimonials">Testimonials</Link></li>
+              <li><Link href="#contact">Contact</Link></li>
+            </ul>
+          </nav>
+          <Link href="#contact" className="cta-button">Start Coordinating</Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </header>
+
+      {/* Hero Section */}
+      <section id="home" className="hero">
+        <div className="container">
+          <h1>Rapid Disaster Response with Milson Response</h1>
+          <p className="subtitle">
+            Real-time tools for incident reporting, resource tracking, and communication to save lives and restore communities.
+          </p>
+          <Link href="#contact" className="cta-button primary">Start Saving Lives</Link>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="features">
+        <div className="container">
+          <h2>Powerful Features for Disaster Response</h2>
+          <div className="feature-grid">
+            <div className="feature-card">
+              <Image
+                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=60&h=60&q=80"
+                alt="User Authentication"
+                width={60}
+                height={60}
+                className="feature-icon"
+              />
+              <h3>Role-Based Authentication</h3>
+              <p>Secure login for emergency services, volunteers, and admins with tailored access levels.</p>
+            </div>
+            <div className="feature-card">
+              <Image
+                src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=60&h=60&q=80"
+                alt="Incident Reporting"
+                width={60}
+                height={60}
+                className="feature-icon"
+              />
+              <h3>Incident Reporting System</h3>
+              <p>Submit reports with geolocation and images for rapid situational awareness.</p>
+            </div>
+            <div className="feature-card">
+              <Image
+                src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=60&h=60&q=80"
+                alt="Real-Time Chat"
+                width={60}
+                height={60}
+                className="feature-icon"
+              />
+              <h3>Real-Time Chat & Notifications</h3>
+              <p>Instant communication and updates for coordinated response efforts.</p>
+            </div>
+            <div className="feature-card">
+              <Image
+                src="https://images.unsplash.com/photo-1590402494682-cd3fb53b1f70?auto=format&fit=crop&w=60&h=60&q=80"
+                alt="Map View"
+                width={60}
+                height={60}
+                className="feature-icon"
+              />
+              <h3>Map View & Resource Tracking</h3>
+              <p>Visualize incidents and track resources in real time on interactive maps.</p>
+            </div>
+            <div className="feature-card">
+              <Image
+                src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=60&h=60&q=80"
+                alt="Admin Dashboard"
+                width={60}
+                height={60}
+                className="feature-icon"
+              />
+              <h3>Admin Dashboard</h3>
+              <p>Manage tasks, allocate resources, and monitor progress from a centralized hub.</p>
+            </div>
+            <div className="feature-card">
+              <Image
+                src="https://images.unsplash.com/photo-1556745753-b2904692b3cd?q=80&w=1373&auto=format&fit=crop"
+                alt="Communications System"
+                width={60}
+                height={60}
+                className="feature-icon"
+              />
+              <h3>Communications System</h3>
+              <p>Connect emergency services, volunteers, and citizens for seamless collaboration.</p>
+            </div>
+            <div className="feature-card">
+              <Image
+                src="https://plus.unsplash.com/premium_photo-1661284828052-ea25d6ea94cd?q=80&w=1470&auto=format&fit=crop"
+                alt="Resource Allocation"
+                width={60}
+                height={60}
+                className="feature-icon"
+              />
+              <h3>Resource Allocation</h3>
+              <p>Efficiently distribute supplies and personnel to where they’re needed most.</p>
+            </div>
+            <div className="feature-card">
+              <Image
+                src="https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=60&h=60&q=80"
+                alt="Rescue Progress"
+                width={60}
+                height={60}
+                className="feature-icon"
+              />
+              <h3>Real-Time Rescue Updates</h3>
+              <p>Track and update rescue operations to ensure timely interventions.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="about">
+        <div className="container">
+          <h2>About Milson Response</h2>
+          <p>
+            Milson Response is a cutting-edge platform designed to enhance disaster response coordination.
+            By integrating advanced GIS technology, real-time communication, and robust task management,
+            we empower emergency services, volunteers, and communities to respond effectively to natural
+            disasters, saving lives and reducing impact.
+          </p>
+          <Link href="#contact" className="cta-button secondary">Learn More</Link>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="testimonials">
+        <div className="container">
+          <h2>What Our Users Say</h2>
+          <div className="testimonial-grid">
+            <div className="testimonial-card">
+              <p>&quot;Milson Response streamlined our disaster response, enabling faster resource allocation and coordination.&quot;</p>
+              <h4>Emma Carter, Emergency Manager</h4>
+            </div>
+            <div className="testimonial-card">
+              <p>&quot;The real-time chat and map view transformed how we manage volunteer efforts.&quot;</p>
+              <h4>Michael Lee, Volunteer Coordinator</h4>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section id="contact" className="cta">
+        <div className="container">
+          <h2>Ready to Enhance Your Disaster Response?</h2>
+          <p>Join Milson Response to coordinate, track, and communicate effectively during emergencies.</p>
+          <Link href="/contact" className="cta-button primary">Request a Demo</Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="container">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>Milson Response</h3>
+              <p>Empowering disaster response worldwide.</p>
+            </div>
+            <div className="footer-section">
+              <h3>Quick Links</h3>
+              <ul>
+                <li><Link href="#home">Home</Link></li>
+                <li><Link href="#features">Features</Link></li>
+                <li><Link href="#about">About</Link></li>
+                <li><Link href="#contact">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="footer-section">
+              <h3>Contact Us</h3>
+              <p>Email: info@milsonresponse.com</p>
+              <p>Phone: +1 (800) 123-4567</p>
+            </div>
+          </div>
+          <p className="footer-bottom">© 2025 Milson Response. All rights reserved.</p>
+        </div>
       </footer>
-    </div>
+    </>
   );
 }
