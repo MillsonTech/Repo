@@ -1,8 +1,16 @@
+"use client";
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   return (
     <>
       <Head>
@@ -23,16 +31,24 @@ export default function Home() {
               Milson Response
             </Link>
           </div>
-          <nav className="nav">
+          <button className="hamburger" onClick={toggleMenu} aria-label="Toggle menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 6H21V8H3V6ZM3 11H21V13H3V11ZM3 16H21V18H3V16Z" fill="#333" />
+            </svg>
+          </button>
+          <nav className={`nav ${menuOpen ? 'open' : ''}`}>
             <ul>
-              <li><Link href="#home">Home</Link></li>
-              <li><Link href="#features">Features</Link></li>
-              <li><Link href="#about">About</Link></li>
-              <li><Link href="#testimonials">Testimonials</Link></li>
-              <li><Link href="#contact">Contact</Link></li>
+              <li><Link href="#home" onClick={toggleMenu}>Home</Link></li>
+              <li><Link href="#features" onClick={toggleMenu}>Features</Link></li>
+              <li><Link href="#about" onClick={toggleMenu}>About</Link></li>
+              <li><Link href="#testimonials" onClick={toggleMenu}>Testimonials</Link></li>
+              <li><Link href="#contact" onClick={toggleMenu}>Contact</Link></li>
+              {/* <li className="mobile-only">
+                <Link href="/select-task" onClick={toggleMenu}>Start Coordinating</Link>
+              </li> */}
             </ul>
           </nav>
-          <Link href="#contact" className="cta-button">Start Coordinating</Link>
+          <Link href="/select-task" className="cta-button desktop-only">Get Started</Link>
         </div>
       </header>
 
@@ -43,7 +59,7 @@ export default function Home() {
           <p className="subtitle">
             Real-time tools for incident reporting, resource tracking, and communication to save lives and restore communities.
           </p>
-          <Link href="#contact" className="cta-button primary">Start Saving Lives</Link>
+          <Link href="/select-task" className="cta-button primary">Start Saving Lives</Link>
         </div>
       </section>
 
@@ -204,7 +220,7 @@ export default function Home() {
             <div className="footer-section">
               <h3>Contact Us</h3>
               <p>Email: info@milsonresponse.com</p>
-              <p>Phone: +1 (800) 123-4567</p>
+              <p>Phone: +234 703 347 3455</p>
             </div>
           </div>
           <p className="footer-bottom">© 2025 Milson Response. All rights reserved.</p>

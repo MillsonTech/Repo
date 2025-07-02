@@ -1,9 +1,39 @@
+"use client";
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import './styles.css'; // Import task-specific CSS
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../lib/firebase';
+import './styles.css';
 
 export default function Tasks() {
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Toggle menu for mobile
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  // Check authentication status
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
+
+  const handleTaskClick = (path: string) => {
+    if (isLoggedIn) {
+      router.push(path); // Navigate to task page
+    } else {
+      router.push('/sign-in'); // Redirect to sign-in
+    }
+  };
+
   return (
     <>
       <Head>
@@ -17,33 +47,40 @@ export default function Tasks() {
       </Head>
 
       {/* Header */}
-      <header className="header">
+      {/* <header className="header">
         <div className="container">
           <div className="logo">
             <Link href="/" className="logo-text">
               Milson Response
             </Link>
           </div>
-          <nav className="nav">
+          <button className="hamburger" onClick={toggleMenu} aria-label="Toggle menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 6H21V8H3V6ZM3 11H21V13H3V11ZM3 16H21V18H3V16Z" fill="#333" />
+            </svg>
+          </button>
+          <nav className={`nav ${menuOpen ? 'open' : ''}`}>
             <ul>
-              <li><Link href="/#home">Home</Link></li>
-              <li><Link href="/#features">Features</Link></li>
-              <li><Link href="/#about">About</Link></li>
-              <li><Link href="/#testimonials">Testimonials</Link></li>
-              <li><Link href="/#contact">Contact</Link></li>
+              <li><Link href="/#home" onClick={toggleMenu}>Home</Link></li>
+              <li><Link href="/#features" onClick={toggleMenu}>Features</Link></li>
+              <li><Link href="/#about" onClick={toggleMenu}>About</Link></li>
+              <li><Link href="/#testimonials" onClick={toggleMenu}>Testimonials</Link></li>
+              <li><Link href="/#contact" onClick={toggleMenu}>Contact</Link></li>
+              <li className="mobile-only">
+                <Link href="/#contact" onClick={toggleMenu}>Start Coordinating</Link>
+              </li>
             </ul>
           </nav>
-          <Link href="/#contact" className="cta-button">Start Coordinating</Link>
+          <Link href="/#contact" className="cta-button desktop-only">Start Coordinating</Link>
         </div>
-      </header>
+      </header> */}
 
       {/* Task Selection Section */}
       <section id="tasks" className="tasks">
         <div className="container">
-          <h1>Select Your Task</h1>
-          <p className="subtitle">
-            Help communities in crisis by reporting incidents or volunteering for disaster response.
-          </p>
+          <h1>Select Task</h1>
+          <br></br><br></br>
+          
           <div className="task-grid">
             <div className="task-card">
               <Image
@@ -55,7 +92,12 @@ export default function Tasks() {
               />
               <h2>Report Incident</h2>
               <p>Submit real-time incident reports with geolocation and images to aid rapid response.</p>
-              <Link href="/report" className="cta-button primary">Report Now</Link>
+              <button
+                onClick={() => handleTaskClick('/report-incident')}
+                className="cta-button primary"
+              >
+                Report Now
+              </button>
             </div>
             <div className="task-card">
               <Image
@@ -67,14 +109,19 @@ export default function Tasks() {
               />
               <h2>Volunteer</h2>
               <p>Join our efforts to support disaster-affected communities through coordinated action.</p>
-              <Link href="/volunteer" className="cta-button primary">Volunteer Now</Link>
+              <button
+                onClick={() => handleTaskClick('/all-incidents')}
+                className="cta-button primary"
+              >
+                Volunteer Now
+              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="footer">
+      {/* <footer className="footer">
         <div className="container">
           <div className="footer-content">
             <div className="footer-section">
@@ -98,7 +145,7 @@ export default function Tasks() {
           </div>
           <p className="footer-bottom">© 2025 Milson Response. All rights reserved.</p>
         </div>
-      </footer>
+      </footer> */}
     </>
   );
 }

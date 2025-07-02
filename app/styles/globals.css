@@ -1,0 +1,155 @@
+/* app/styles/global.css */
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;300;400;500;700;900&display=swap');
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Geist Mono', monospace;
+  line-height: 1.6;
+  color: #333;
+  background: #fff;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 15px 0;
+}
+
+.header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.logo-text {
+  text-decoration: none;
+  color: #007bff;
+  transition: color 0.3s ease;
+}
+
+.logo-text:hover {
+  color: #0056b3;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+.nav ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav ul li a:hover {
+  color: #007bff;
+}
+
+.cta-button {
+  background: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 500;
+  transition: background 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.cta-button:hover {
+  background: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .header .container {
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .nav {
+    display: none;
+    width: 100%;
+  }
+
+  .nav.open {
+    display: block;
+    background: #fff;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .nav ul {
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    align-items: center;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.4rem;
+  }
+
+  .hamburger svg {
+    width: 20px;
+    height: 20px;
+  }
+}

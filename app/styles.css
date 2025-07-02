@@ -100,145 +100,165 @@ body {
 
 .cta-button.primary {
   background: #007bff;
-  width: 100%;
 }
 
 .cta-button.primary:hover {
   background: #0056b3;
 }
 
-.cta-button.google {
-  background: #fff;
-  color: #333;
-  border: 1px solid #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
+.cta-button.secondary {
+  background: #00c4b4;
 }
 
-.cta-button.google:hover {
+.cta-button.secondary:hover {
+  background: #009b8b;
+}
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(rgba(0, 123, 255, 0.8), rgba(0, 123, 255, 0.8)),
+    url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  padding: 100px 0;
+  text-align: center;
+  color: #fff;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hero .subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Features Section */
+.features {
+  padding: 60px 0;
   background: #f8f9fa;
 }
 
-.google-icon {
-  width: 24px;
-  height: 24px;
+.features h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 40px;
 }
 
-/* sign-in Section */
-.sign-in {
-  padding: 40px 0;
-  background: #f8f9fa;
-  min-height: calc(100vh - 70px - 220px); /* Full height minus header and footer */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
 }
 
-.sign-in-card {
+.feature-card {
   background: #fff;
-  padding: 40px;
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 100%;
   text-align: center;
 }
 
-.sign-in h1 {
-  font-size: 2rem;
-  font-weight: 700;
+.feature-icon {
+  margin-bottom: 20px;
+}
+
+.feature-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
   margin-bottom: 10px;
 }
 
-.subtitle {
-  font-size: 1.1rem;
-  color: #555;
-  margin-bottom: 20px;
-}
-
-.error {
-  color: #d32f2f;
-  font-size: 0.9rem;
-  margin-bottom: 20px;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group {
-  text-align: left;
-}
-
-.form-group label {
-  display: block;
+.feature-card p {
   font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px;
-  font-size: 1rem;
-  font-family: 'Geist Mono', monospace;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-}
-
-.form-group input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
-}
-
-.form-group input::placeholder {
-  color: #999;
-}
-
-.divider {
-  margin: 20px 0;
-  font-size: 0.9rem;
   color: #555;
-  position: relative;
+}
+
+/* About Section */
+.about {
+  padding: 60px 0;
   text-align: center;
 }
 
-.divider::before,
-.divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 40%;
-  height: 1px;
-  background: #ccc;
+.about h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
 }
 
-.divider::before {
-  left: 0;
+.about p {
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto 30px;
+  color: #555;
 }
 
-.divider::after {
-  right: 0;
+/* Testimonials Section */
+.testimonials {
+  padding: 60px 0;
+  background: #f8f9fa;
 }
 
-.switch-auth {
-  margin-top: 20px;
-  font-size: 0.9rem;
+.testimonials h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 40px;
 }
 
-.switch-auth a {
-  color: #007bff;
-  text-decoration: none;
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
 }
 
-.switch-auth a:hover {
-  text-decoration: underline;
+.testimonial-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.testimonial-card p {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.testimonial-card h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* CTA Section */
+.cta {
+  padding: 60px 0;
+  text-align: center;
+  background: #007bff;
+  color: #fff;
+}
+
+.cta h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cta p {
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Footer */
@@ -333,64 +353,67 @@ body {
     font-size: 1.5rem;
   }
 
-  .sign-in {
-    padding: 20px 0;
+  .hero {
+    padding: 60px 0;
   }
 
-  .sign-in-card {
-    padding: 20px;
-    max-width: 90%;
+  .hero h1 {
+    font-size: 2rem;
   }
 
-  .sign-in h1 {
-    font-size: 1.8rem;
-  }
-
-  .subtitle {
+  .hero .subtitle {
     font-size: 1rem;
   }
 
-  .cta-button {
-    font-size: 0.9rem;
-    padding: 8px 16px;
+  .features h2,
+  .about h2,
+  .testimonials h2,
+  .cta h2 {
+    font-size: 2rem;
   }
 
-  .google-icon {
-    width: 20px;
-    height: 20px;
+  .feature-grid,
+  .testimonial-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .sign-in h1 {
-    font-size: 1.6rem;
-  }
-
-  .subtitle {
-    font-size: 0.9rem;
-  }
-
-  .form-group input {
-    font-size: 0.9rem;
-    padding: 8px;
-  }
-
-  .cta-button {
-    font-size: 0.85rem;
-    padding: 8px 14px;
-  }
-
-  .google-icon {
-    width: 18px;
-    height: 18px;
-  }
-
-  .switch-auth {
-    font-size: 0.85rem;
+  .logo {
+    font-size: 1.4rem;
   }
 
   .hamburger svg {
     width: 20px;
     height: 20px;
+  }
+
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .hero .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .features h2,
+  .about h2,
+  .testimonials h2,
+  .cta h2 {
+    font-size: 1.8rem;
+  }
+
+  .cta p {
+    font-size: 1rem;
+  }
+
+  .feature-card h3,
+  .testimonial-card h4 {
+    font-size: 1.3rem;
+  }
+
+  .feature-card p,
+  .testimonial-card p {
+    font-size: 0.9rem;
   }
 }

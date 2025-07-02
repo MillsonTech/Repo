@@ -53,6 +53,18 @@ body {
   color: #0056b3;
 }
 
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+}
+
 .nav ul {
   display: flex;
   list-style: none;
@@ -78,6 +90,8 @@ body {
   border-radius: 5px;
   font-weight: 500;
   transition: background 0.3s ease;
+  border: none;
+  cursor: pointer;
 }
 
 .cta-button:hover {
@@ -86,40 +100,78 @@ body {
 
 .cta-button.primary {
   background: #007bff;
+  width: 100%;
 }
 
 .cta-button.primary:hover {
   background: #0056b3;
 }
 
-/* Sign-Up Section */
-.sign-up {
-  padding: 80px 0;
-  text-align: center;
+.cta-button.google {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.cta-button.google:hover {
   background: #f8f9fa;
 }
 
+.google-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Sign-Up Section */
+.sign-up {
+  padding: 40px 0;
+  background: #f8f9fa;
+  min-height: calc(100vh - 70px - 220px); /* Full height minus header and footer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sign-up-card {
+  background: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
 .sign-up h1 {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #555;
   margin-bottom: 20px;
 }
 
-.sign-up .subtitle {
-  font-size: 1.2rem;
-  font-weight: 400;
-  color: #555;
-  max-width: 600px;
-  margin: 0 auto 30px;
+.error {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
 }
 
 .auth-form {
-  max-width: 400px;
-  margin: 0 auto 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .form-group {
-  margin-bottom: 20px;
   text-align: left;
 }
 
@@ -145,43 +197,39 @@ body {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-.cta-button.google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: #fff;
-  color: #333;
-  border: 1px solid #ccc;
-  padding: 10px 20px;
-  margin: 0 auto 20px;
-}
-
-.cta-button.google:hover {
-  background: #f1f1f1;
-}
-
-.google-icon {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
+.form-group input::placeholder {
+  color: #999;
 }
 
 .divider {
-  font-size: 1rem;
-  color: #555;
   margin: 20px 0;
+  font-size: 0.9rem;
+  color: #555;
+  position: relative;
+  text-align: center;
 }
 
-.error {
-  color: #d32f2f;
-  font-size: 0.9rem;
-  margin-bottom: 20px;
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #ccc;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
 }
 
 .switch-auth {
-  font-size: 1rem;
-  color: #555;
+  margin-top: 20px;
+  font-size: 0.9rem;
 }
 
 .switch-auth a {
@@ -242,17 +290,43 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .header .container {
-    flex-direction: column;
-    gap: 15px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .nav {
+    display: none;
+    width: 100%;
+  }
+
+  .nav.open {
+    display: block;
+    background: #fff;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
   }
 
   .nav ul {
     flex-direction: column;
     gap: 10px;
+    padding: 20px;
+    align-items: center;
   }
 
-  .nav ul li {
-    margin-left: 0;
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
   }
 
   .logo {
@@ -260,37 +334,63 @@ body {
   }
 
   .sign-up {
-    padding: 60px 0;
+    padding: 20px 0;
+  }
+
+  .sign-up-card {
+    padding: 20px;
+    max-width: 90%;
   }
 
   .sign-up h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
-  .sign-up .subtitle {
-    font-size: 1.1rem;
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .cta-button {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+
+  .google-icon {
+    width: 20px;
+    height: 20px;
   }
 }
 
 @media (max-width: 480px) {
   .sign-up h1 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 
-  .sign-up .subtitle {
-    font-size: 1rem;
+  .subtitle {
+    font-size: 0.9rem;
   }
 
-  .auth-form {
-    max-width: 100%;
+  .form-group input {
+    font-size: 0.9rem;
+    padding: 8px;
   }
 
   .cta-button {
-    padding: 10px 20px;
-    font-size: 1rem;
+    font-size: 0.85rem;
+    padding: 8px 14px;
   }
 
-  .cta-button.google {
-    font-size: 0.9rem;
+  .google-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .switch-auth {
+    font-size: 0.85rem;
+  }
+
+  .hamburger svg {
+    width: 20px;
+    height: 20px;
   }
 }

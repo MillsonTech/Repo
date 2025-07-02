@@ -53,6 +53,18 @@ body {
   color: #0056b3;
 }
 
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+}
+
 .nav ul {
   display: flex;
   list-style: none;
@@ -78,6 +90,8 @@ body {
   border-radius: 5px;
   font-weight: 500;
   transition: background 0.3s ease;
+  border: none;
+  cursor: pointer;
 }
 
 .cta-button:hover {
@@ -208,17 +222,43 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .header .container {
-    flex-direction: column;
-    gap: 15px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .nav {
+    display: none;
+    width: 100%;
+  }
+
+  .nav.open {
+    display: block;
+    background: #fff;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
   }
 
   .nav ul {
     flex-direction: column;
     gap: 10px;
+    padding: 20px;
+    align-items: center;
   }
 
-  .nav ul li {
-    margin-left: 0;
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
   }
 
   .logo {
@@ -248,6 +288,15 @@ body {
 }
 
 @media (max-width: 480px) {
+  .logo {
+    font-size: 1.4rem;
+  }
+
+  .hamburger svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .tasks h1 {
     font-size: 1.8rem;
   }

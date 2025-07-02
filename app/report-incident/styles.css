@@ -1,0 +1,508 @@
+/* Import Geist Mono from Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;300;400;500;700;900&display=swap");
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Geist Mono", monospace;
+  line-height: 1.6;
+  color: #333;
+  background: #fff;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.container-full {
+  width: 100%;
+  padding: 0 20px;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 15px 0;
+}
+
+.header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.logo-text {
+  text-decoration: none;
+  color: #007bff;
+  transition: color 0.3s ease;
+}
+
+.logo-text:hover {
+  color: #0056b3;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav ul {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+}
+
+.nav ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav ul li a:hover {
+  color: #007bff;
+}
+
+.cta-button {
+  background: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 500;
+  transition: background 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.cta-button:hover {
+  background: #0056b3;
+}
+
+.cta-button.primary {
+  background: #007bff;
+}
+
+.cta-button.primary:hover {
+  background: #0056b3;
+}
+
+.cta-button.secondary {
+  background: #00c4b4;
+}
+
+.cta-button.secondary:hover {
+  background: #009b8b;
+}
+
+.cta-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Report Incident Section */
+.report-incident {
+  padding: 40px 0;
+  background: #f8f9fa;
+  min-height: calc(100vh - 70px - 220px); /* Full height minus header and footer */
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: 4fr 6fr; /* Form 40%, Map 60% */
+  gap: 30px;
+  max-width: 100%;
+  height: calc(100vh - 150px - 220px); /* Adjust for header and footer */
+}
+
+.form-column {
+  padding: 20px;
+}
+
+.map-column {
+  padding: 20px;
+}
+
+.report-form {
+  max-width: 500px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  font-family: "Geist Mono", monospace;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-group textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+/* File Input Styles */
+.file-input-wrapper {
+  position: relative;
+}
+
+.file-input {
+  display: none; /* Hide default file input */
+}
+
+.file-input-label {
+  display: inline-block;
+  background: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-family: "Geist Mono", monospace;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  text-align: center;
+}
+
+.file-input-label:hover {
+  background: #0056b3;
+}
+
+.photo-preview {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.photo-wrapper {
+  position: relative;
+}
+
+.photo-thumbnail {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.remove-photo {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.remove-photo:hover {
+  background: #b71c1c;
+}
+
+.map-container {
+  height: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.coordinates {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 10px;
+}
+
+.disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.disclaimer input[type="checkbox"] {
+  width: auto;
+}
+
+.disclaimer label {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.success {
+  color: #00c4b4;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+/* Leaflet GeoSearch Styles */
+.leaflet-control-geosearch input {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  font-family: "Geist Mono", monospace;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+.leaflet-control-geosearch input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.leaflet-control-geosearch .results {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.leaflet-control-geosearch .results .result {
+  padding: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.leaflet-control-geosearch .results .result:hover {
+  background: #f8f9fa;
+}
+
+/* Footer */
+.footer {
+  background: #333;
+  color: #fff;
+  padding: 50px 0 20px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.footer-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.footer-section p,
+.footer-section ul li {
+  font-size: 0.9rem;
+}
+
+.footer-section ul {
+  list-style: none;
+}
+
+.footer-section ul li a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+  color: #00c4b4;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header .container {
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .nav {
+    display: none;
+    width: 100%;
+  }
+
+  .nav.open {
+    display: block;
+    background: #fff;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .nav ul {
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    align-items: center;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .report-incident {
+    padding: 20px 0;
+  }
+
+  .report-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+  }
+
+  .form-column,
+  .map-column {
+    padding: 10px;
+  }
+
+  .map-container {
+    height: 300px;
+  }
+
+  .report-incident h1 {
+    font-size: 2rem;
+  }
+
+  .report-incident .subtitle {
+    font-size: 1.1rem;
+  }
+
+  .report-form {
+    max-width: 100%;
+  }
+
+  .leaflet-control-geosearch input {
+    font-size: 0.9rem;
+  }
+
+  .file-input-label {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+
+  .photo-thumbnail {
+    width: 80px;
+    height: 80px;
+  }
+
+  .remove-photo {
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.4rem;
+  }
+
+  .hamburger svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .report-incident h1 {
+    font-size: 1.8rem;
+  }
+
+  .report-incident .subtitle {
+    font-size: 1rem;
+  }
+
+  .cta-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+
+  .map-container {
+    height: 200px;
+  }
+
+  .file-input-label {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+
+  .photo-thumbnail {
+    width: 70px;
+    height: 70px;
+  }
+}

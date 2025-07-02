@@ -1,0 +1,144 @@
+.incidents {
+  padding: 40px 0;
+  background-color: #f5f7fa;
+}
+
+.incidents h1 {
+  font-family: "Geist Mono", monospace;
+  color: #007bff;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.incidents .subtitle {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.filter-search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: "Geist Mono", monospace;
+  font-size: 16px;
+}
+
+.filter-panel {
+  display: none;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.filter-panel.open {
+  display: block;
+}
+
+.filter-panel .form-group {
+  margin-bottom: 15px;
+}
+
+.filter-panel label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.filter-panel input,
+.filter-panel select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: "Geist Mono", monospace;
+}
+
+.active-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.filter-chip {
+  background: #00c4b4;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.filter-chip button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.incidents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.incident-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: "Geist Mono", monospace;
+}
+
+.incident-card p {
+  margin: 10px 0;
+}
+
+.incident-card .coordinates {
+  color: #555;
+  font-size: 14px;
+}
+
+.incident-card .photo-preview {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.incident-card .photo-thumbnail {
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+  .filter-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  .filter-panel.open {
+    display: block;
+  }
+
+  .incidents-grid {
+    grid-template-columns: 1fr;
+  }
+}
