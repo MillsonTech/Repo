@@ -59,7 +59,7 @@ export default function Home() {
           <p className="subtitle">
             Real-time tools for incident reporting, resource tracking, and communication to save lives and restore communities.
           </p>
-          <Link href="/select-task" className="cta-button primary">Start Saving Lives</Link>
+          <Link href="/select-task" className="cta-button primary">Get Started</Link>
         </div>
       </section>
 

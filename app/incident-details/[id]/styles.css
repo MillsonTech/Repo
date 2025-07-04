@@ -1,0 +1,315 @@
+/* Incident Details Section */
+.incident-details {
+  padding: 40px 0;
+  background-color: #f9fafb;
+  min-height: calc(100vh - 80px - 250px); /* Adjust for header and footer */
+}
+
+/* Heading and Subtitle */
+.incident-details h1 {
+  font-family: "Geist Mono", monospace;
+  color: #007bff;
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.incident-details .subtitle {
+  text-align: center;
+  color: #333;
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  font-family: "Geist Mono", monospace;
+}
+
+/* Grid Layout for Desktop */
+.incident-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr; /* Details 40%, Map 60% */
+  gap: 30px;
+  margin-bottom: 40px;
+  align-items: start; /* Prevent stretching */
+  box-sizing: border-box;
+}
+
+/* Details Column */
+.details-column {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Map Column */
+.map-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Map Section */
+.map-section {
+  width: 100%;
+}
+
+.map-container {
+  height: 400px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Details Section */
+.details-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.details-section h2 {
+  font-family: "Geist Mono", monospace;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.details-section p {
+  font-family: "Geist Mono", monospace;
+  font-size: 1rem;
+  margin: 10px 0;
+  color: #333;
+}
+
+.details-section p strong {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.navigate-button {
+  margin-top: 20px;
+}
+
+/* Photos Section */
+.photos-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photos-section h2 {
+  font-family: "Geist Mono", monospace;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.photo-wrapper {
+  cursor: pointer;
+}
+
+.photo-wrapper img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-wrapper img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Donation Section */
+.donation-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+}
+
+.donation-section h2 {
+  font-family: "Geist Mono", monospace;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.donation-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.donation-form .form-group {
+  margin-bottom: 20px;
+}
+
+.donation-form label {
+  display: block;
+  font-family: "Geist Mono", monospace;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.donation-form input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-family: "Geist Mono", monospace;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.donation-form input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.2);
+}
+
+/* Full-Screen Photo Modal */
+.photo-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.photo-modal-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  width: 100%;
+  height: 100%;
+}
+
+.full-screen-photo {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
+.close-button {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease;
+}
+
+.close-button:hover {
+  background: #f0f0f0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .incident-details-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .map-container {
+    height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .incident-details {
+    padding: 30px 0;
+  }
+
+  .incident-details h1 {
+    font-size: 2rem;
+  }
+
+  .incident-details .subtitle {
+    font-size: 1.1rem;
+  }
+
+  .map-container {
+    height: 300px;
+  }
+
+  .photo-wrapper img {
+    height: 120px;
+  }
+
+  .donation-form {
+    max-width: 100%;
+  }
+
+  .close-button {
+    top: -30px;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .incident-details h1 {
+    font-size: 1.8rem;
+  }
+
+  .incident-details .subtitle {
+    font-size: 1rem;
+  }
+
+  .map-container {
+    height: 250px;
+  }
+
+  .photo-wrapper img {
+    height: 100px;
+  }
+
+  .details-section h2,
+  .photos-section h2,
+  .donation-section h2 {
+    font-size: 1.3rem;
+  }
+
+  .donation-form input {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .cta-button.primary {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}

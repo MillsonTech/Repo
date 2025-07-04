@@ -443,69 +443,40 @@ export default function IncidentsPage() {
             <p>No approved incidents found.</p>
           ) : (
             <div className="incidents-grid">
-              {filteredIncidents.map((incident) => (
-                <div key={incident.id} className="incident-card">
-                  <p>{incident.description}</p>
-                  <p className="coordinates">
-                    Location: Lat {incident.latitude.toFixed(6)}, Lon {incident.longitude.toFixed(6)}
-                  </p>
-                  {incident.createdAt && (
-                    <p>Reported: {incident.createdAt.toLocaleString()}</p>
-                  )}
-                  {incident.photoUrls.length > 0 && (
-                    <div className="photo-preview">
-                      {incident.photoUrls.map((url, index) => (
-                        <Image
-                          key={index}
-                          src={url}
-                          alt={`Incident photo ${index + 1}`}
-                          width={100}
-                          height={100}
-                          className="photo-thumbnail"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+             {filteredIncidents.map((incident) => (
+  <div
+    key={incident.id}
+    className="incident-card"
+    onClick={() => router.push(`/incident-details/${incident.id}`)} // Navigate to details page
+    style={{ cursor: "pointer" }}
+  >
+    <p>{incident.description}</p>
+    <p className="coordinates">
+      Location: Lat {incident.latitude.toFixed(6)}, Lon {incident.longitude.toFixed(6)}
+    </p>
+    {incident.createdAt && (
+      <p>Reported: {incident.createdAt.toLocaleString()}</p>
+    )}
+    {incident.photoUrls.length > 0 && (
+      <div className="photo-preview">
+        {incident.photoUrls.map((url, index) => (
+          <Image
+            key={index}
+            src={url}
+            alt={`Incident photo ${index + 1}`}
+            width={100}
+            height={100}
+            className="photo-thumbnail"
+          />
+        ))}
+      </div>
+    )}
+  </div>
+))}
             </div>
           )}
         </div>
       </section>
-
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-section">
-              <h3>Milson Response</h3>
-              <p>Empowering disaster response worldwide.</p>
-            </div>
-            <div className="footer-section">
-              <h3>Quick Links</h3>
-              <ul>
-                <li>
-                  <Link href="/#home">Home</Link>
-                </li>
-                <li>
-                  <Link href="/#features">Features</Link>
-                </li>
-                <li>
-                  <Link href="/#about">About</Link>
-                </li>
-                <li>
-                  <Link href="/#contact">Contact</Link>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-section">
-              <h3>Contact Us</h3>
-              <p>Email: info@milsonresponse.com</p>
-              <p>Phone: +1 (800) 123-4567</p>
-            </div>
-          </div>
-          <p className="footer-bottom">© 2025 Milson Response. All rights reserved.</p>
-        </div>
-      </footer>
     </>
   );
 }
