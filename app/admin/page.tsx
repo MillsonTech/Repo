@@ -14,9 +14,13 @@ import "./styles.css";
 // Interface for user document
 interface User {
   displayName?: string;
+  email?: string;
+  role?: string;
+  createdAt?: string;
+  uid: string;
 }
 
-// Zustand store for admin state
+// Interface for incident
 interface Incident {
   id: string;
   userId: string;
@@ -29,15 +33,39 @@ interface Incident {
   status: string;
 }
 
+// Interface for donation
+interface Donation {
+  id: string;
+  amount: number;
+  email: string;
+  incidentId: string;
+  createdAt: Date | null;
+  incidentDetails?: {
+    description: string;
+    latitude: number;
+    longitude: number;
+    status: string;
+  };
+}
+
+// Zustand store for admin state
 interface AdminState {
   searchQuery: string;
   incidents: Incident[];
   filteredIncidents: Incident[];
+  donations: Donation[];
+  filteredDonations: Donation[];
+  users: User[];
+  filteredUsers: User[];
   activeTab: string;
   isLoading: boolean;
   setSearchQuery: (query: string) => void;
   setIncidents: (incidents: Incident[]) => void;
   setFilteredIncidents: (incidents: Incident[]) => void;
+  setDonations: (donations: Donation[]) => void;
+  setFilteredDonations: (donations: Donation[]) => void;
+  setUsers: (users: User[]) => void;
+  setFilteredUsers: (users: User[]) => void;
   setActiveTab: (tab: string) => void;
   setIsLoading: (loading: boolean) => void;
   resetFilters: () => void;
@@ -47,26 +75,46 @@ const useAdminStore = create<AdminState>((set) => ({
   searchQuery: "",
   incidents: [],
   filteredIncidents: [],
+  donations: [],
+  filteredDonations: [],
+  users: [],
+  filteredUsers: [],
   activeTab: "incidents",
   isLoading: false,
   setSearchQuery: (searchQuery) =>
     set((state) => {
-      const filtered = state.incidents.filter(
+      const filteredIncidents = state.incidents.filter(
         (incident) =>
           incident.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
           incident.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
           incident.displayName.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      return { searchQuery, filteredIncidents: filtered };
+      const filteredDonations = state.donations.filter(
+        (donation) =>
+          donation.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (donation.incidentDetails?.description || "").toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      const filteredUsers = state.users.filter(
+        (user) =>
+          (user.displayName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (user.email || "").toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      return { searchQuery, filteredIncidents, filteredDonations, filteredUsers };
     }),
   setIncidents: (incidents) => set({ incidents, filteredIncidents: incidents }),
   setFilteredIncidents: (filteredIncidents) => set({ filteredIncidents }),
+  setDonations: (donations) => set({ donations, filteredDonations: donations }),
+  setFilteredDonations: (filteredDonations) => set({ filteredDonations }),
+  setUsers: (users) => set({ users, filteredUsers: users }),
+  setFilteredUsers: (filteredUsers) => set({ filteredUsers }),
   setActiveTab: (activeTab) => set({ activeTab }),
   setIsLoading: (isLoading) => set({ isLoading }),
   resetFilters: () =>
     set((state) => ({
       searchQuery: "",
       filteredIncidents: state.incidents,
+      filteredDonations: state.donations,
+      filteredUsers: state.users,
     })),
 }));
 
@@ -76,11 +124,19 @@ export default function AdminPage() {
     searchQuery,
     incidents,
     filteredIncidents,
+    donations,
+    filteredDonations,
+    users,
+    filteredUsers,
     activeTab,
     isLoading,
     setSearchQuery,
     setIncidents,
     setFilteredIncidents,
+    setDonations,
+    setFilteredDonations,
+    setUsers,
+    setFilteredUsers,
     setActiveTab,
     setIsLoading,
     resetFilters,
@@ -91,22 +147,20 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar toggle
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Check authentication and admin status
+  // Check authentication and admin status, fetch incidents, donations, and users
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && user.email === "admin@milsonresponse.com") {
         setIsAuthenticated(true);
         setIsAdmin(true);
 
-        // Fetch all incidents and user display names
+        // Fetch incidents
         const fetchIncidents = async () => {
           setIsLoading(true);
           const toastId = toast.loading("Fetching incidents...");
-
           try {
-            console.log("Firestore doc function:", doc); // Debug
             const incidentsQuery = query(collection(db, "incidents"), orderBy("createdAt", "desc"));
             const querySnapshot = await getDocs(incidentsQuery);
             const incidentsData: Incident[] = await Promise.all(
@@ -120,14 +174,10 @@ export default function AdminPage() {
                     if (userDoc.exists()) {
                       const userData = userDoc.data() as User;
                       displayName = userData.displayName || "Unknown User";
-                    } else {
-                      console.warn(`User document not found for userId: ${data.userId}`);
                     }
                   } catch (error) {
                     console.error(`Error fetching user data for userId: ${data.userId}`, error);
                   }
-                } else {
-                  console.warn(`Invalid or missing userId for incident: ${docSnapshot.id}`);
                 }
                 return {
                   id: docSnapshot.id,
@@ -142,7 +192,6 @@ export default function AdminPage() {
                 };
               })
             );
-
             setIncidents(incidentsData);
             toast.success(`Loaded ${incidentsData.length} incident(s)!`, { id: toastId });
           } catch (err: any) {
@@ -152,7 +201,75 @@ export default function AdminPage() {
             setIsLoading(false);
           }
         };
+
+        // Fetch donations with incident details
+        const fetchDonations = async () => {
+          try {
+            const donationsQuery = query(collection(db, "donations"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(donationsQuery);
+            const donationsData: Donation[] = await Promise.all(
+              querySnapshot.docs.map(async (docSnapshot) => {
+                const data = docSnapshot.data();
+                let incidentDetails: Donation["incidentDetails"] = undefined;
+                if (data.incidentId) {
+                  try {
+                    const incidentDocRef = doc(db, "incidents", data.incidentId);
+                    const incidentDoc = await getDoc(incidentDocRef);
+                    if (incidentDoc.exists()) {
+                      const incidentData = incidentDoc.data();
+                      incidentDetails = {
+                        description: incidentData.description || "",
+                        latitude: incidentData.latitude || 0,
+                        longitude: incidentData.longitude || 0,
+                        status: incidentData.status || "pending",
+                      };
+                    }
+                  } catch (error) {
+                    console.error(`Error fetching incident data for incidentId: ${data.incidentId}`, error);
+                  }
+                }
+                return {
+                  id: docSnapshot.id,
+                  amount: data.amount || 0,
+                  email: data.email || "",
+                  incidentId: data.incidentId || "",
+                  createdAt: data.createdAt ? data.createdAt.toDate() : null,
+                  incidentDetails,
+                };
+              })
+            );
+            setDonations(donationsData);
+          } catch (err: any) {
+            console.error("Error fetching donations:", err);
+            toast.error("Failed to fetch donations.");
+          }
+        };
+
+        // Fetch users
+        const fetchUsers = async () => {
+          try {
+            const usersQuery = query(collection(db, "users"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(usersQuery);
+            const usersData: User[] = querySnapshot.docs.map((docSnapshot) => {
+              const data = docSnapshot.data();
+              return {
+                uid: docSnapshot.id,
+                displayName: data.displayName || "Unknown User",
+                email: data.email || "",
+                role: data.role || "user",
+                createdAt: data.createdAt || "",
+              };
+            });
+            setUsers(usersData);
+          } catch (err: any) {
+            console.error("Error fetching users:", err);
+            toast.error("Failed to fetch users.");
+          }
+        };
+
         fetchIncidents();
+        fetchDonations();
+        fetchUsers();
       } else {
         setIsAuthenticated(!!user);
         setIsAdmin(false);
@@ -160,7 +277,7 @@ export default function AdminPage() {
     });
 
     return () => unsubscribe();
-  }, [setIncidents, setIsLoading]);
+  }, [setIncidents, setDonations, setUsers, setIsLoading]);
 
   // Handle admin login
   const handleLogin = async (e: React.FormEvent) => {
@@ -268,7 +385,7 @@ export default function AdminPage() {
     <>
       <Head>
         <title>Milson Response - Admin Panel</title>
-        <meta name="description" content="Admin panel for managing incidents." />
+        <meta name="description" content="Admin panel for managing incidents, donations, and users." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -311,7 +428,7 @@ export default function AdminPage() {
                   className={`sidebar-button ${activeTab === "incidents" ? "active" : ""}`}
                   onClick={() => {
                     setActiveTab("incidents");
-                    setIsSidebarOpen(false); // Close sidebar on selection
+                    setIsSidebarOpen(false);
                   }}
                 >
                   Incidents
@@ -319,10 +436,32 @@ export default function AdminPage() {
               </li>
               <li>
                 <button
+                  className={`sidebar-button ${activeTab === "donations" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("donations");
+                    setIsSidebarOpen(false);
+                  }}
+                >
+                  Donations
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`sidebar-button ${activeTab === "users" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("users");
+                    setIsSidebarOpen(false);
+                  }}
+                >
+                  Users
+                </button>
+              </li>
+              <li>
+                <button
                   className={`sidebar-button ${activeTab === "settings" ? "active" : ""}`}
                   onClick={() => {
                     setActiveTab("settings");
-                    setIsSidebarOpen(false); // Close sidebar on selection
+                    setIsSidebarOpen(false);
                   }}
                 >
                   Settings
@@ -370,7 +509,9 @@ export default function AdminPage() {
                         {incident.createdAt && (
                           <p>Reported: {incident.createdAt.toLocaleString()}</p>
                         )}
-                        <p>Status: {incident.status}</p>
+                        <p>
+                          Status: {incident.status.toLowerCase() === "approved" ? "Ongoing" : incident.status}
+                        </p>
                         {incident.photoUrls.length > 0 && (
                           <div className="photo-preview">
                             {incident.photoUrls.map((url, index) => (
@@ -404,6 +545,103 @@ export default function AdminPage() {
                             </button>
                           )}
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "donations" && (
+              <div className="tab-content">
+                <h2>Donations</h2>
+                <div className="filter-search-bar">
+                  <input
+                    type="text"
+                    placeholder="Search by email or incident description..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="search-input"
+                    disabled={isLoading}
+                  />
+                  {searchQuery && (
+                    <button className="cta-button secondary" onClick={resetFilters}>
+                      Clear Search
+                    </button>
+                  )}
+                </div>
+
+                {isLoading ? (
+                  <p>Loading donations...</p>
+                ) : filteredDonations.length === 0 ? (
+                  <p>No donations found.</p>
+                ) : (
+                  <div className="donations-grid">
+                    {filteredDonations.map((donation) => (
+                      <div key={donation.id} className="donation-card">
+                        <p><strong>Amount:</strong> {donation.amount} NGN</p>
+                        <p><strong>Donor Email:</strong> {donation.email}</p>
+                        {donation.createdAt && (
+                          <p><strong>Donated:</strong> {donation.createdAt.toLocaleString()}</p>
+                        )}
+                        {donation.incidentDetails ? (
+                          <>
+                            <p><strong>Incident:</strong> {donation.incidentDetails.description}</p>
+                            <p className="coordinates">
+                              <strong>Location:</strong> Lat {donation.incidentDetails.latitude.toFixed(6)}, Lon{" "}
+                              {donation.incidentDetails.longitude.toFixed(6)}
+                            </p>
+                            <p>
+                              <strong>Incident Status:</strong>{" "}
+                              {donation.incidentDetails.status.toLowerCase() === "approved"
+                                ? "Ongoing"
+                                : donation.incidentDetails.status}
+                            </p>
+                          </>
+                        ) : (
+                          <p><strong>Incident:</strong> Not found (ID: {donation.incidentId})</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "users" && (
+              <div className="tab-content">
+                <h2>Users</h2>
+                <div className="filter-search-bar">
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="search-input"
+                    disabled={isLoading}
+                  />
+                  {searchQuery && (
+                    <button className="cta-button secondary" onClick={resetFilters}>
+                      Clear Search
+                    </button>
+                  )}
+                </div>
+
+                {isLoading ? (
+                  <p>Loading users...</p>
+                ) : filteredUsers.length === 0 ? (
+                  <p>No users found.</p>
+                ) : (
+                  <div className="users-grid">
+                    {filteredUsers.map((user) => (
+                      <div key={user.uid} className="user-card">
+                        <p><strong>Name:</strong> {user.displayName}</p>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        <p><strong>Role:</strong> {user.role}</p>
+                        <p><strong>UID:</strong> {user.uid}</p>
+                        {user.createdAt && (
+                          <p><strong>Joined:</strong> {new Date(user.createdAt).toLocaleString()}</p>
+                        )}
                       </div>
                     ))}
                   </div>
