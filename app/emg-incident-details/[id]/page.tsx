@@ -1,12 +1,12 @@
-// IncidentDetails.tsx
 "use client";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../../lib/firebase";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { doc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth, db, storage } from "../../lib/firebase";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import toast, { Toaster } from "react-hot-toast";
@@ -42,7 +42,17 @@ type Incident = {
   latitude: number;
   longitude: number;
   createdAt: Date | null;
-  status: string;
+  emgStatus: string; // Changed from status to emgStatus
+};
+
+type ChatMessage = {
+  id: string;
+  senderEmail: string;
+  senderName: string;
+  text?: string;
+  mediaUrl?: string;
+  mediaType?: "photo" | "video";
+  createdAt: Date;
 };
 
 // Haversine formula to calculate distance
@@ -65,6 +75,36 @@ const calculateDistance = (
   return R * c;
 };
 
+// Map emgStatus to display text and icons
+const getStatusDisplay = (emgStatus: string) => {
+  switch (emgStatus.toLowerCase()) {
+    case "on the way":
+      return {
+        text: "Emergency services are on the way",
+        icon: "🚑",
+        className: "status-on-the-way",
+      };
+    case "arrived":
+      return {
+        text: "Emergency services have arrived",
+        icon: "📍",
+        className: "status-arrived",
+      };
+    case "completed":
+      return {
+        text: "Emergency services have completed this",
+        icon: "✅",
+        className: "status-completed",
+      };
+    default:
+      return {
+        text: "Awaiting emergency services",
+        icon: "⏳",
+        className: "status-approved",
+      };
+  }
+};
+
 export default function IncidentDetails() {
   const router = useRouter();
   const { id } = useParams();
@@ -76,7 +116,15 @@ export default function IncidentDetails() {
     longitude: number;
   } | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
   const userEmail = auth.currentUser?.email || "";
+  const senderName = userEmail === "emergencyservices@milsonresponse.com" ? "You" : auth.currentUser?.displayName || userEmail.split("@")[0];
 
   // Fetch incident details
   useEffect(() => {
@@ -103,7 +151,7 @@ export default function IncidentDetails() {
           latitude: data.latitude || 0,
           longitude: data.longitude || 0,
           createdAt: data.createdAt ? data.createdAt.toDate() : null,
-          status: data.status || "",
+          emgStatus: data.emgStatus || "approved", // Use emgStatus
         });
         toast.success("Incident details loaded!", { id: toastId });
       } catch (err: any) {
@@ -116,6 +164,41 @@ export default function IncidentDetails() {
 
     fetchIncident();
   }, [id, router]);
+
+  // Fetch chat messages in real-time
+  useEffect(() => {
+    if (!id || !chatOpen) return;
+
+    const chatsQuery = query(
+      collection(db, "incidents", id as string, "chats"),
+      orderBy("createdAt", "asc")
+    );
+
+    const unsubscribe = onSnapshot(chatsQuery, (snapshot) => {
+      const messages: ChatMessage[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        senderEmail: doc.data().senderEmail,
+        senderName: doc.data().senderName,
+        text: doc.data().text,
+        mediaUrl: doc.data().mediaUrl,
+        mediaType: doc.data().mediaType,
+        createdAt: doc.data().createdAt.toDate(),
+      }));
+      setChatMessages(messages);
+    }, (error) => {
+      toast.error("Failed to load chat messages.");
+      console.error("Error fetching chats:", error);
+    });
+
+    return () => unsubscribe();
+  }, [id, chatOpen]);
+
+  // Scroll to the bottom of the chat when new messages are added
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   // Get user's current location
   useEffect(() => {
@@ -135,9 +218,7 @@ export default function IncidentDetails() {
           }
         },
         (error) => {
-          toast.error(
-            "Failed to get your location. Please enable location services."
-          );
+          toast.error("Failed to get your location. Please enable location services.");
           console.error("Geolocation error:", error);
         }
       );
@@ -153,9 +234,9 @@ export default function IncidentDetails() {
     const toastId = toast.loading("Updating status...");
     try {
       await updateDoc(doc(db, "incidents", incident.id), {
-        emgStatus: newStatus,
+        emgStatus: newStatus, // Update emgStatus
       });
-      setIncident((prev) => (prev ? { ...prev, status: newStatus } : null));
+      setIncident((prev) => (prev ? { ...prev, emgStatus: newStatus } : null));
       toast.success(`Status updated to ${newStatus}!`, { id: toastId });
     } catch (error) {
       toast.error("Failed to update status.", { id: toastId });
@@ -182,21 +263,95 @@ export default function IncidentDetails() {
     setSelectedPhoto(null);
   }, []);
 
-  // Close modal on Escape key
+  // Handle chat modal toggle
+  const toggleChat = () => {
+    setChatOpen(!chatOpen);
+  };
+
+  // Close chat or photo modal on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        closePhoto();
+        if (chatOpen) {
+          setChatOpen(false);
+        } else {
+          closePhoto();
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closePhoto]);
+  }, [chatOpen, closePhoto]);
+
+  // Handle sending a new message
+const handleSendMessage = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!incident || !userEmail || (!newMessage.trim() && !mediaFile)) return;
+  if (incident.emgStatus.toLowerCase() === "completed") {
+    toast.error("Cannot send messages for completed incidents.");
+    return;
+  }
+
+  setIsSending(true);
+  const toastId = toast.loading("Sending message...");
+
+  try {
+    // Initialize the document data with required fields
+    const docData: {
+      senderEmail: string;
+      senderName: string;
+      text?: string;
+      mediaUrl?: string;
+      mediaType?: "photo" | "video";
+      createdAt: Date;
+    } = {
+      senderEmail: userEmail,
+      senderName,
+      createdAt: new Date(),
+    };
+
+    // Add text if provided
+    if (newMessage.trim()) {
+      docData.text = newMessage.trim();
+    }
+
+    // Handle media file upload if provided
+    if (mediaFile) {
+      const fileRef = ref(storage, `chats/${id}/${Date.now()}_${mediaFile.name}`);
+      await uploadBytes(fileRef, mediaFile);
+      docData.mediaUrl = await getDownloadURL(fileRef);
+      docData.mediaType = mediaFile.type.startsWith("video/") ? "video" : "photo";
+    }
+
+    await addDoc(collection(db, "incidents", id as string, "chats"), docData);
+
+    toast.success("Message sent!", { id: toastId });
+    setNewMessage("");
+    setMediaFile(null);
+  } catch (error) {
+    toast.error("Failed to send message.", { id: toastId });
+    console.error("Error sending message:", error);
+  } finally {
+    setIsSending(false);
+  }
+};
+
+  // Handle media file selection
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error("File size exceeds 10MB limit.");
+        return;
+      }
+      setMediaFile(file);
+    }
+  };
 
   // Redirect to login if user is not authenticated
   if (!userEmail) {
     toast.error("Please log in to view incident details.");
-    router.push("/login");
+    router.push("/sign-in");
     return null;
   }
 
@@ -218,6 +373,8 @@ export default function IncidentDetails() {
       </div>
     );
   }
+
+  const { text, icon, className } = getStatusDisplay(incident.emgStatus);
 
   return (
     <>
@@ -242,21 +399,11 @@ export default function IncidentDetails() {
           </div>
           <nav className="nav">
             <ul>
-              <li>
-                <Link href="/#home">Home</Link>
-              </li>
-              <li>
-                <Link href="/#features">Features</Link>
-              </li>
-              <li>
-                <Link href="/#about">About</Link>
-              </li>
-              <li>
-                <Link href="/#contact">Contact</Link>
-              </li>
-              <li>
-                <Link href="/incidents">Incidents</Link>
-              </li>
+              <li><Link href="/#home">Home</Link></li>
+              <li><Link href="/#features">Features</Link></li>
+              <li><Link href="/#about">About</Link></li>
+              <li><Link href="/#contact">Contact</Link></li>
+              <li><Link href="/incidents">Incidents</Link></li>
             </ul>
           </nav>
         </div>
@@ -272,7 +419,6 @@ export default function IncidentDetails() {
               <div className="details-section">
                 <h2>Incident Information</h2>
                 <p>{incident.description}</p>
-
                 {distance !== null && (
                   <p>
                     <strong>Distance:</strong> {distance.toFixed(2)} km
@@ -280,17 +426,11 @@ export default function IncidentDetails() {
                 )}
                 {incident.createdAt && (
                   <p>
-                    <strong>Date Reported:</strong>{" "}
-                    {incident.createdAt.toLocaleString()}
+                    <strong>Date Reported:</strong> {incident.createdAt.toLocaleString()}
                   </p>
                 )}
-                <p>
-                  <strong>Status:</strong>{" "}
-                  {incident.status.toLowerCase() === "completed"
-                    ? "Incident addressed successfully"
-                    : incident.status.toLowerCase() === "approved"
-                    ? "Ongoing"
-                    : incident.status}
+                <p className={`status-display ${className}`}>
+                  <span className="status-icon">{icon}</span> {text}
                 </p>
                 <button
                   className="cta-button primary navigate-button"
@@ -298,7 +438,12 @@ export default function IncidentDetails() {
                 >
                   Navigate to Location
                 </button>
-                {/* Status Update Section */}
+                <button
+                  className="cta-button secondary chat-button"
+                  onClick={toggleChat}
+                >
+                  {chatOpen ? "Close Chat" : "Open Chat"}
+                </button>
                 <div className="status-update-section">
                   <h3>Update Incident Status</h3>
                   <div className="status-buttons">
@@ -306,9 +451,9 @@ export default function IncidentDetails() {
                       className="cta-button secondary"
                       onClick={() => handleStatusUpdate("On the Way")}
                       disabled={
-                        incident.status === "On the Way" ||
-                        incident.status === "Arrived" ||
-                        incident.status === "Completed"
+                        incident.emgStatus === "On the Way" ||
+                        incident.emgStatus === "Arrived" ||
+                        incident.emgStatus === "Completed"
                       }
                     >
                       On the Way
@@ -317,8 +462,8 @@ export default function IncidentDetails() {
                       className="cta-button secondary"
                       onClick={() => handleStatusUpdate("Arrived")}
                       disabled={
-                        incident.status === "Arrived" ||
-                        incident.status === "Completed"
+                        incident.emgStatus === "Arrived" ||
+                        incident.emgStatus === "Completed"
                       }
                     >
                       Arrived
@@ -326,7 +471,7 @@ export default function IncidentDetails() {
                     <button
                       className="cta-button secondary"
                       onClick={() => handleStatusUpdate("Completed")}
-                      disabled={incident.status === "Completed"}
+                      disabled={incident.emgStatus === "Completed"}
                     >
                       Completed
                     </button>
@@ -378,10 +523,7 @@ export default function IncidentDetails() {
                     )}
                     {userLocation && (
                       <Marker
-                        position={[
-                          userLocation.latitude,
-                          userLocation.longitude,
-                        ]}
+                        position={[userLocation.latitude, userLocation.longitude]}
                         icon={userMarkerIcon}
                       />
                     )}
@@ -410,6 +552,100 @@ export default function IncidentDetails() {
         </div>
       )}
 
+      {chatOpen && (
+        <div className="chat-modal" onClick={toggleChat}>
+          <div className="chat-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="close-button" onClick={toggleChat}>
+              ×
+            </button>
+            <div className="chat-header">
+              <h2>Incident Chat</h2>
+            </div>
+            <div className="chat-messages" ref={chatContainerRef}>
+              {chatMessages.length === 0 ? (
+                <p className="no-messages">No messages yet.</p>
+              ) : (
+                chatMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`chat-bubble ${
+                      message.senderEmail === userEmail ? "sent" : "received"
+                    }`}
+                  >
+                    <div className="chat-bubble-header">
+                      <span className="sender-name">{message.senderName}</span>
+                      <span className="timestamp">
+                        {message.createdAt.toLocaleString()}
+                      </span>
+                    </div>
+                    {message.text && <p>{message.text}</p>}
+                    {message.mediaUrl && message.mediaType === "photo" && (
+                      <div className="chat-media">
+                        <Image
+                          src={message.mediaUrl}
+                          alt="Chat photo"
+                          width={200}
+                          height={200}
+                          className="chat-photo"
+                          onClick={() => openPhoto(message.mediaUrl)}
+                        />
+                      </div>
+                    )}
+                    {message.mediaUrl && message.mediaType === "video" && (
+                      <div className="chat-media">
+                        <video
+                          src={message.mediaUrl}
+                          controls
+                          className="chat-video"
+                          style={{ maxWidth: "200px", maxHeight: "200px" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+            {incident.emgStatus.toLowerCase() !== "completed" ? (
+              <form className="chat-form" onSubmit={handleSendMessage}>
+                <div className="chat-input-group">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    disabled={isSending}
+                  />
+                  <label className="media-upload-label">
+                    <span>📎</span>
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleMediaChange}
+                      disabled={isSending}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className="cta-button primary"
+                    disabled={isSending || (!newMessage.trim() && !mediaFile)}
+                  >
+                    Send
+                  </button>
+                </div>
+                {mediaFile && (
+                  <p className="media-preview">Selected: {mediaFile.name}</p>
+                )}
+              </form>
+            ) : (
+              <p className="chat-disabled">
+                Messaging is disabled for completed incidents.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
@@ -420,18 +656,10 @@ export default function IncidentDetails() {
             <div className="footer-section">
               <h3>Quick Links</h3>
               <ul>
-                <li>
-                  <Link href="/#home">Home</Link>
-                </li>
-                <li>
-                  <Link href="/#features">Features</Link>
-                </li>
-                <li>
-                  <Link href="/#about">About</Link>
-                </li>
-                <li>
-                  <Link href="/#contact">Contact</Link>
-                </li>
+                <li><Link href="/#home">Home</Link></li>
+                <li><Link href="/#features">Features</Link></li>
+                <li><Link href="/#about">About</Link></li>
+                <li><Link href="/#contact">Contact</Link></li>
               </ul>
             </div>
             <div className="footer-section">
@@ -440,9 +668,7 @@ export default function IncidentDetails() {
               <p>Phone: +1 (800) 123-4567</p>
             </div>
           </div>
-          <p className="footer-bottom">
-            © 2025 Milson Response. All rights reserved.
-          </p>
+          <p className="footer-bottom">© 2025 Milson Response. All rights reserved.</p>
         </div>
       </footer>
     </>

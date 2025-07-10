@@ -3,9 +3,10 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
-import { doc, getDoc, collection, addDoc } from "firebase/firestore";
-import { auth, db } from "../../lib/firebase";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth, db, storage } from "../../lib/firebase";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import toast, { Toaster } from "react-hot-toast";
@@ -41,7 +42,17 @@ type Incident = {
   latitude: number;
   longitude: number;
   createdAt: Date | null;
-  emgStatus: string; // Changed from status to emgStatus
+  emgStatus: string;
+};
+
+type ChatMessage = {
+  id: string;
+  senderEmail: string;
+  senderName: string;
+  text?: string;
+  mediaUrl?: string;
+  mediaType?: "photo" | "video";
+  createdAt: Date;
 };
 
 // Haversine formula to calculate distance between two points (in kilometers)
@@ -95,9 +106,16 @@ export default function IncidentDetails() {
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Get authenticated user's email
   const userEmail = auth.currentUser?.email || "";
+  const senderName = userEmail === "emergencyservices@milsonresponse.com" ? "Emergency Responder" : auth.currentUser?.displayName || userEmail.split("@")[0];
 
   // Function to save donation to Firestore
   const saveDonation = async (amount: number, incidentId: string, email: string) => {
@@ -159,7 +177,7 @@ export default function IncidentDetails() {
           latitude: data.latitude || 0,
           longitude: data.longitude || 0,
           createdAt: data.createdAt ? data.createdAt.toDate() : null,
-          emgStatus: data.emgStatus || "approved", // Use emgStatus
+          emgStatus: data.emgStatus || "approved",
         });
         toast.success("Incident details loaded!", { id: toastId });
       } catch (err: any) {
@@ -172,6 +190,41 @@ export default function IncidentDetails() {
 
     fetchIncident();
   }, [id, router]);
+
+  // Fetch chat messages in real-time
+  useEffect(() => {
+    if (!id || !chatOpen) return;
+
+    const chatsQuery = query(
+      collection(db, "incidents", id as string, "chats"),
+      orderBy("createdAt", "asc")
+    );
+
+    const unsubscribe = onSnapshot(chatsQuery, (snapshot) => {
+      const messages: ChatMessage[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        senderEmail: doc.data().senderEmail,
+        senderName: doc.data().senderName,
+        text: doc.data().text,
+        mediaUrl: doc.data().mediaUrl,
+        mediaType: doc.data().mediaType,
+        createdAt: doc.data().createdAt.toDate(),
+      }));
+      setChatMessages(messages);
+    }, (error) => {
+      toast.error("Failed to load chat messages.");
+      console.error("Error fetching chats:", error);
+    });
+
+    return () => unsubscribe();
+  }, [id, chatOpen]);
+
+  // Scroll to the bottom of the chat when new messages are added
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   // Get user's current location
   useEffect(() => {
@@ -219,16 +272,90 @@ export default function IncidentDetails() {
     setSelectedPhoto(null);
   }, []);
 
-  // Close modal on Escape key
+  // Handle chat modal toggle
+  const toggleChat = () => {
+    setChatOpen(!chatOpen);
+  };
+
+  // Close chat or photo modal on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        closePhoto();
+        if (chatOpen) {
+          setChatOpen(false);
+        } else {
+          closePhoto();
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closePhoto]);
+  }, [chatOpen, closePhoto]);
+
+  // Handle sending a new message
+const handleSendMessage = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!incident || !userEmail || (!newMessage.trim() && !mediaFile)) return;
+  if (incident.emgStatus.toLowerCase() === "completed") {
+    toast.error("Cannot send messages for completed incidents.");
+    return;
+  }
+
+  setIsSending(true);
+  const toastId = toast.loading("Sending message...");
+
+  try {
+    // Initialize the document data with required fields
+    const docData: {
+      senderEmail: string;
+      senderName: string;
+      text?: string;
+      mediaUrl?: string;
+      mediaType?: "photo" | "video";
+      createdAt: Date;
+    } = {
+      senderEmail: userEmail,
+      senderName,
+      createdAt: new Date(),
+    };
+
+    // Add text if provided
+    if (newMessage.trim()) {
+      docData.text = newMessage.trim();
+    }
+
+    // Handle media file upload if provided
+    if (mediaFile) {
+      const fileRef = ref(storage, `chats/${id}/${Date.now()}_${mediaFile.name}`);
+      await uploadBytes(fileRef, mediaFile);
+      docData.mediaUrl = await getDownloadURL(fileRef);
+      docData.mediaType = mediaFile.type.startsWith("video/") ? "video" : "photo";
+    }
+
+    await addDoc(collection(db, "incidents", id as string, "chats"), docData);
+
+    toast.success("Message sent!", { id: toastId });
+    setNewMessage("");
+    setMediaFile(null);
+  } catch (error) {
+    toast.error("Failed to send message.", { id: toastId });
+    console.error("Error sending message:", error);
+  } finally {
+    setIsSending(false);
+  }
+};
+
+  // Handle media file selection
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error("File size exceeds 10MB limit.");
+        return;
+      }
+      setMediaFile(file);
+    }
+  };
 
   // Redirect to login if user is not authenticated
   if (!userEmail) {
@@ -298,7 +425,6 @@ export default function IncidentDetails() {
               <div className="details-section">
                 <h2>Incident Information</h2>
                 <p>{incident.description}</p>
-                
                 {distance !== null && (
                   <p>
                     <strong>Distance:</strong> {distance.toFixed(2)} km
@@ -317,6 +443,12 @@ export default function IncidentDetails() {
                   onClick={handleNavigateToLocation}
                 >
                   Navigate to Location
+                </button>
+                <button
+                  className="cta-button secondary chat-button"
+                  onClick={toggleChat}
+                >
+                  {chatOpen ? "Close Chat" : "Open Chat"}
                 </button>
               </div>
 
@@ -399,6 +531,7 @@ export default function IncidentDetails() {
         </div>
       </section>
 
+      {/* Full-screen photo modal */}
       {selectedPhoto && (
         <div className="photo-modal" onClick={closePhoto}>
           <div className="photo-modal-content">
@@ -412,6 +545,101 @@ export default function IncidentDetails() {
               objectFit="contain"
               className="full-screen-photo"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Chat modal */}
+      {chatOpen && (
+        <div className="chat-modal" onClick={toggleChat}>
+          <div className="chat-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="close-button" onClick={toggleChat}>
+              ×
+            </button>
+            <div className="chat-header">
+              <h2>Incident Chat</h2>
+            </div>
+            <div className="chat-messages" ref={chatContainerRef}>
+              {chatMessages.length === 0 ? (
+                <p className="no-messages">No messages yet.</p>
+              ) : (
+                chatMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`chat-bubble ${
+                      message.senderEmail === userEmail ? "sent" : "received"
+                    }`}
+                  >
+                    <div className="chat-bubble-header">
+                      <span className="sender-name">{message.senderName}</span>
+                      <span className="timestamp">
+                        {message.createdAt.toLocaleString()}
+                      </span>
+                    </div>
+                    {message.text && <p>{message.text}</p>}
+                    {message.mediaUrl && message.mediaType === "photo" && (
+                      <div className="chat-media">
+                        <Image
+                          src={message.mediaUrl}
+                          alt="Chat photo"
+                          width={200}
+                          height={200}
+                          className="chat-photo"
+                          onClick={() => openPhoto(message.mediaUrl)}
+                        />
+                      </div>
+                    )}
+                    {message.mediaUrl && message.mediaType === "video" && (
+                      <div className="chat-media">
+                        <video
+                          src={message.mediaUrl}
+                          controls
+                          className="chat-video"
+                          style={{ maxWidth: "200px", maxHeight: "200px" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+            {incident.emgStatus.toLowerCase() !== "completed" ? (
+              <form className="chat-form" onSubmit={handleSendMessage}>
+                <div className="chat-input-group">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    disabled={isSending}
+                  />
+                  <label className="media-upload-label">
+                    <span>📎</span>
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleMediaChange}
+                      disabled={isSending}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className="cta-button primary"
+                    disabled={isSending || (!newMessage.trim() && !mediaFile)}
+                  >
+                    Send
+                  </button>
+                </div>
+                {mediaFile && (
+                  <p className="media-preview">Selected: {mediaFile.name}</p>
+                )}
+              </form>
+            ) : (
+              <p className="chat-disabled">
+                Messaging is disabled for completed incidents.
+              </p>
+            )}
           </div>
         </div>
       )}

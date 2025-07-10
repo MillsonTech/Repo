@@ -125,14 +125,6 @@ export default function IncidentsPage() {
         router.push("/sign-in");
         return;
       }
-
-      // Restrict access to only emergencyservices@milsonresponse.com
-      if (user.email !== "emergencyservices@milsonresponse.com") {
-        toast.error("Access denied. Only authorized emergency services can view this page.");
-        router.push("/sign-in");
-        return;
-      }
-
       setIsLoading(true);
       const toastId = toast.loading("Fetching incidents...");
 
