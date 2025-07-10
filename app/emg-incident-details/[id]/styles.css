@@ -1,8 +1,10 @@
+/* styles.css */
+
 /* Incident Details Section */
 .incident-details {
   padding: 40px 0;
   background-color: #f9fafb;
-  min-height: calc(100vh - 80px - 250px); /* Adjust for header and footer */
+  min-height: calc(100vh - 80px - 250px);
 }
 
 /* Heading and Subtitle */
@@ -26,10 +28,10 @@
 /* Grid Layout for Desktop */
 .incident-details-grid {
   display: grid;
-  grid-template-columns: 1fr 1.5fr; /* Details 40%, Map 60% */
+  grid-template-columns: 1fr 1.5fr;
   gap: 30px;
   margin-bottom: 40px;
-  align-items: start; /* Prevent stretching */
+  align-items: start;
   box-sizing: border-box;
 }
 
@@ -92,6 +94,30 @@
   margin-top: 20px;
 }
 
+/* Status Update Section */
+.status-update-section {
+  margin-top: 20px;
+}
+
+.status-update-section h3 {
+  font-family: "Geist Mono", monospace;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.status-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-buttons .cta-button {
+  flex: 1;
+  min-width: 100px;
+}
+
 /* Photos Section */
 .photos-section {
   background: #fff;
@@ -130,57 +156,6 @@
 .photo-wrapper img:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Donation Section */
-.donation-section {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
-}
-
-.donation-section h2 {
-  font-family: "Geist Mono", monospace;
-  color: #333;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
-.donation-form {
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.donation-form .form-group {
-  margin-bottom: 20px;
-}
-
-.donation-form label {
-  display: block;
-  font-family: "Geist Mono", monospace;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.donation-form input {
-  width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  font-family: "Geist Mono", monospace;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.donation-form input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 6px rgba(0, 123, 255, 0.2);
 }
 
 /* Full-Screen Photo Modal */
@@ -256,7 +231,7 @@
     font-size: 2rem;
   }
 
-  .incident-details .subtitle {
+  .incident-Details .subtitle {
     font-size: 1.1rem;
   }
 
@@ -266,10 +241,6 @@
 
   .photo-wrapper img {
     height: 120px;
-  }
-
-  .donation-form {
-    max-width: 100%;
   }
 
   .close-button {
@@ -299,19 +270,27 @@
 
   .details-section h2,
   .photos-section h2,
-  .donation-section h2 {
+  .status-update-section h3 {
     font-size: 1.3rem;
   }
 
-  .donation-form input {
-    padding: 10px;
-    font-size: 0.9rem;
+  .status-buttons {
+    flex-direction: column;
+  }
+
+  .status-buttons .cta-button {
+    width: 100%;
   }
 
   .cta-button.primary {
     padding: 10px 20px;
     font-size: 0.9rem;
   }
+}
+.cta-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 /* Status Display */
 .status-display {

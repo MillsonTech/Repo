@@ -276,6 +276,7 @@ export default function ReportIncident() {
         longitude,
         createdAt: serverTimestamp(),
         status: "pending",
+        emgStatus:"pending",
       });
 
       toast.success("Incident reported successfully!", { id: toastId });

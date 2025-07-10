@@ -44,7 +44,7 @@ type Incident = {
   latitude: number;
   longitude: number;
   createdAt: Date | null;
-  emgStatus: string; // Changed from status to emgStatus
+  status: string;
 };
 
 const useIncidentsStore = create<IncidentsState>((set) => ({
@@ -117,7 +117,7 @@ export default function IncidentsPage() {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
 
-  // Check authentication and fetch approved incidents
+  // Check authentication and restrict access to emergencyservices@milsonresponse.com
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -154,7 +154,7 @@ export default function IncidentsPage() {
             latitude: data.latitude || 0,
             longitude: data.longitude || 0,
             createdAt: data.createdAt ? data.createdAt.toDate() : null,
-            emgStatus: data.emgStatus || "approved", // Use emgStatus
+            status: data.status || "",
           };
         });
 
@@ -219,7 +219,7 @@ export default function IncidentsPage() {
 
     setFilteredIncidents(filtered);
     if (filtered.length === 0 && incidents.length > 0) {
-      // toast.error("No incidents match the current filters.");
+      //toast.error("No incidents match the current filters.");
     }
   }, [searchQuery, dateStart, dateEnd, incidentType, radius, incidents, latitude, longitude, setFilteredIncidents]);
 
@@ -266,43 +266,13 @@ export default function IncidentsPage() {
     }
   };
 
-  // Map emgStatus to display text and icons
-  const getStatusDisplay = (emgStatus: string) => {
-    switch (emgStatus.toLowerCase()) {
-      case "on the way":
-        return {
-          text: "Emergency services are on the way",
-          icon: "🚑",
-          className: "status-on-the-way",
-        };
-      case "arrived":
-        return {
-          text: "Emergency services have arrived",
-          icon: "📍",
-          className: "status-arrived",
-        };
-      case "completed":
-        return {
-          text: "Emergency services have completed this",
-          icon: "✅",
-          className: "status-completed",
-        };
-      default:
-        return {
-          text: "Awaiting emergency services",
-          icon: "⏳",
-          className: "status-approved",
-        };
-    }
-  };
-
   return (
     <>
       <Head>
         <title>Milson Response - Approved Incidents</title>
         <meta
           name="description"
-          content="View all approved incidents reported to Milson Response."
+          content="These incidents are waiting for response"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -364,8 +334,8 @@ export default function IncidentsPage() {
 
       <section className="incidents">
         <div className="container">
-          <h1>Approved Incidents</h1>
-          <p className="subtitle">View and filter all approved incident reports.</p>
+          <h1>Emergency Services</h1>
+          <p className="subtitle">These incidents are waiting for response.</p>
 
           <div className="filter-search-bar">
             <button className="cta-button secondary" onClick={toggleFilterPanel}>
@@ -480,42 +450,36 @@ export default function IncidentsPage() {
             <p>No approved incidents found.</p>
           ) : (
             <div className="incidents-grid">
-              {filteredIncidents.map((incident) => {
-                const { text, icon, className } = getStatusDisplay(incident.emgStatus);
-                return (
-                  <div
-                    key={incident.id}
-                    className="incident-card"
-                    onClick={() => router.push(`/incident-details/${incident.id}`)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <p>{incident.description}</p>
-                    <p className="coordinates">
-                      Location: Lat {incident.latitude.toFixed(6)}, Lon {incident.longitude.toFixed(6)}
-                    </p>
-                    {incident.createdAt && (
-                      <p>Reported: {incident.createdAt.toLocaleString()}</p>
-                    )}
-                    <p className={`status-display ${className}`}>
-                      <span className="status-icon">{icon}</span> {text}
-                    </p>
-                    {incident.photoUrls.length > 0 && (
-                      <div className="photo-preview">
-                        {incident.photoUrls.map((url, index) => (
-                          <Image
-                            key={index}
-                            src={url}
-                            alt={`Incident photo ${index + 1}`}
-                            width={100}
-                            height={100}
-                            className="photo-thumbnail"
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {filteredIncidents.map((incident) => (
+                <div
+                  key={incident.id}
+                  className="incident-card"
+                  onClick={() => router.push(`/emg-incident-details/${incident.id}`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <p>{incident.description}</p>
+                  <p className="coordinates">
+                    Location: Lat {incident.latitude.toFixed(6)}, Lon {incident.longitude.toFixed(6)}
+                  </p>
+                  {incident.createdAt && (
+                    <p>Reported: {incident.createdAt.toLocaleString()}</p>
+                  )}
+                  {incident.photoUrls.length > 0 && (
+                    <div className="photo-preview">
+                      {incident.photoUrls.map((url, index) => (
+                        <Image
+                          key={index}
+                          src={url}
+                          alt={`Incident photo ${index + 1}`}
+                          width={100}
+                          height={100}
+                          className="photo-thumbnail"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>

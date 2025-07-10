@@ -8,8 +8,8 @@ import {
   FirebaseError,
 } from "firebase/auth";
 import { auth, googleProvider } from "../lib/firebase";
-import toast, { Toaster } from "react-hot-toast"; // Import react-hot-toast
-import {create} from "zustand"; // Import Zustand
+import toast, { Toaster } from "react-hot-toast";
+import { create } from "zustand";
 import "./styles.css";
 
 // Zustand store for sign-in state
@@ -65,9 +65,16 @@ export default function SignIn() {
     const toastId = toast.loading("Signing in...");
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
       toast.success("Signed in successfully!", { id: toastId });
-      setTimeout(() => router.push("/select-task"), 1500); // Redirect after 1.5s
+      setTimeout(() => {
+        if (user.email === "emergencyservices@milsonresponse.com") {
+          router.push("/emg-services");
+        } else {
+          router.push("/select-task");
+        }
+      }, 1500); // Redirect after 1.5s
     } catch (err: any) {
       toast.error(handleFirebaseError(err), { id: toastId });
     } finally {
@@ -81,9 +88,16 @@ export default function SignIn() {
     const toastId = toast.loading("Signing in with Google...");
 
     try {
-      await signInWithPopup(auth, googleProvider);
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const user = userCredential.user;
       toast.success("Signed in with Google successfully!", { id: toastId });
-      setTimeout(() => router.push("/select-task"), 1500); // Redirect after 1.5s
+      setTimeout(() => {
+        if (user.email === "emergencyservices@milsonresponse.com") {
+          router.push("/emg-services");
+        } else {
+          router.push("/select-task");
+        }
+      }, 1500); // Redirect after 1.5s
     } catch (err: any) {
       toast.error(handleFirebaseError(err), { id: toastId });
     } finally {
@@ -119,7 +133,6 @@ export default function SignIn() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* Add Toaster component */}
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
 
       <header className="header">
@@ -187,7 +200,6 @@ export default function SignIn() {
         </div>
       </header>
 
-      {/* Sign-In Section */}
       <section className="sign-in">
         <div className="container">
           <div className="sign-in-card">
@@ -266,7 +278,6 @@ export default function SignIn() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="container">
           <div className="footer-content">

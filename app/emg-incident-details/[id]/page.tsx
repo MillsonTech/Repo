@@ -1,22 +1,22 @@
+// IncidentDetails.tsx
 "use client";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
-import { doc, getDoc, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../lib/firebase";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import toast, { Toaster } from "react-hot-toast";
-import { PaystackButton } from "react-paystack";
 import "leaflet/dist/leaflet.css";
-import "../../report-incident/styles.css"; // Reuse shared styles
+import "../../report-incident/styles.css";
 import "./styles.css";
 
 // Custom marker icons for Leaflet
 const incidentMarkerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png", // Red marker for incident
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -25,7 +25,8 @@ const incidentMarkerIcon = new L.Icon({
 });
 
 const userMarkerIcon = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png", // Blue marker for user
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -41,49 +42,27 @@ type Incident = {
   latitude: number;
   longitude: number;
   createdAt: Date | null;
-  emgStatus: string; // Changed from status to emgStatus
+  status: string;
 };
 
-// Haversine formula to calculate distance between two points (in kilometers)
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-  const R = 6371; // Earth's radius in km
+// Haversine formula to calculate distance
+const calculateDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number => {
+  const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in km
-};
-
-// Map emgStatus to display text and icons
-const getStatusDisplay = (emgStatus: string) => {
-  switch (emgStatus.toLowerCase()) {
-    case "on the way":
-      return {
-        text: "Emergency services are on the way",
-        icon: "🚑",
-        className: "status-on-the-way",
-      };
-    case "arrived":
-      return {
-        text: "Emergency services have arrived",
-        icon: "📍",
-        className: "status-arrived",
-      };
-    case "completed":
-      return {
-        text: "Emergency services have completed this",
-        icon: "✅",
-        className: "status-completed",
-      };
-    default:
-      return {
-        text: "Awaiting emergency services",
-        icon: "⏳",
-        className: "status-approved",
-      };
-  }
+  return R * c;
 };
 
 export default function IncidentDetails() {
@@ -91,48 +70,13 @@ export default function IncidentDetails() {
   const { id } = useParams();
   const [incident, setIncident] = useState<Incident | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [donationAmount, setDonationAmount] = useState<number>(0);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
-
-  // Get authenticated user's email
   const userEmail = auth.currentUser?.email || "";
-
-  // Function to save donation to Firestore
-  const saveDonation = async (amount: number, incidentId: string, email: string) => {
-    try {
-      await addDoc(collection(db, "donations"), {
-        amount,
-        incidentId,
-        email,
-        createdAt: new Date(),
-      });
-      toast.success("Donation recorded successfully!");
-    } catch (error) {
-      toast.error("Failed to record donation.");
-      console.error("Error saving donation:", error);
-    }
-  };
-
-  // Paystack configuration
-  const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "";
-  const paystackConfig = {
-    email: userEmail,
-    amount: donationAmount * 100, // Paystack expects amount in kobo
-    publicKey,
-    text: "Donate Now",
-    onSuccess: () => {
-      if (incident?.id && userEmail) {
-        saveDonation(donationAmount, incident.id, userEmail);
-      }
-      toast.success("Thank you for your donation!");
-      setDonationAmount(0);
-    },
-    onClose: () => {
-      toast.error("Donation cancelled.");
-    },
-  };
 
   // Fetch incident details
   useEffect(() => {
@@ -159,7 +103,7 @@ export default function IncidentDetails() {
           latitude: data.latitude || 0,
           longitude: data.longitude || 0,
           createdAt: data.createdAt ? data.createdAt.toDate() : null,
-          emgStatus: data.emgStatus || "approved", // Use emgStatus
+          status: data.status || "",
         });
         toast.success("Incident details loaded!", { id: toastId });
       } catch (err: any) {
@@ -191,7 +135,9 @@ export default function IncidentDetails() {
           }
         },
         (error) => {
-          toast.error("Failed to get your location. Please enable location services.");
+          toast.error(
+            "Failed to get your location. Please enable location services."
+          );
           console.error("Geolocation error:", error);
         }
       );
@@ -199,6 +145,23 @@ export default function IncidentDetails() {
       toast.error("Geolocation is not supported by your browser.");
     }
   }, [incident]);
+
+  // Handle status update
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!incident?.id) return;
+
+    const toastId = toast.loading("Updating status...");
+    try {
+      await updateDoc(doc(db, "incidents", incident.id), {
+        emgStatus: newStatus,
+      });
+      setIncident((prev) => (prev ? { ...prev, status: newStatus } : null));
+      toast.success(`Status updated to ${newStatus}!`, { id: toastId });
+    } catch (error) {
+      toast.error("Failed to update status.", { id: toastId });
+      console.error("Error updating status:", error);
+    }
+  };
 
   // Handle navigation to location
   const handleNavigateToLocation = () => {
@@ -232,8 +195,8 @@ export default function IncidentDetails() {
 
   // Redirect to login if user is not authenticated
   if (!userEmail) {
-    toast.error("Please log in to view incident details or donate.");
-    router.push("/sign-in");
+    toast.error("Please log in to view incident details.");
+    router.push("/login");
     return null;
   }
 
@@ -256,13 +219,14 @@ export default function IncidentDetails() {
     );
   }
 
-  const { text, icon, className } = getStatusDisplay(incident.emgStatus);
-
   return (
     <>
       <Head>
         <title>Milson Response - Incident Details</title>
-        <meta name="description" content={`Details for incident: ${incident.description}`} />
+        <meta
+          name="description"
+          content={`Details for incident: ${incident.description}`}
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -278,11 +242,21 @@ export default function IncidentDetails() {
           </div>
           <nav className="nav">
             <ul>
-              <li><Link href="/#home">Home</Link></li>
-              <li><Link href="/#features">Features</Link></li>
-              <li><Link href="/#about">About</Link></li>
-              <li><Link href="/#contact">Contact</Link></li>
-              <li><Link href="/incidents">Incidents</Link></li>
+              <li>
+                <Link href="/#home">Home</Link>
+              </li>
+              <li>
+                <Link href="/#features">Features</Link>
+              </li>
+              <li>
+                <Link href="/#about">About</Link>
+              </li>
+              <li>
+                <Link href="/#contact">Contact</Link>
+              </li>
+              <li>
+                <Link href="/incidents">Incidents</Link>
+              </li>
             </ul>
           </nav>
         </div>
@@ -298,7 +272,7 @@ export default function IncidentDetails() {
               <div className="details-section">
                 <h2>Incident Information</h2>
                 <p>{incident.description}</p>
-                
+
                 {distance !== null && (
                   <p>
                     <strong>Distance:</strong> {distance.toFixed(2)} km
@@ -306,11 +280,17 @@ export default function IncidentDetails() {
                 )}
                 {incident.createdAt && (
                   <p>
-                    <strong>Date Reported:</strong> {incident.createdAt.toLocaleString()}
+                    <strong>Date Reported:</strong>{" "}
+                    {incident.createdAt.toLocaleString()}
                   </p>
                 )}
-                <p className={`status-display ${className}`}>
-                  <span className="status-icon">{icon}</span> {text}
+                <p>
+                  <strong>Status:</strong>{" "}
+                  {incident.status.toLowerCase() === "completed"
+                    ? "Incident addressed successfully"
+                    : incident.status.toLowerCase() === "approved"
+                    ? "Ongoing"
+                    : incident.status}
                 </p>
                 <button
                   className="cta-button primary navigate-button"
@@ -318,6 +298,40 @@ export default function IncidentDetails() {
                 >
                   Navigate to Location
                 </button>
+                {/* Status Update Section */}
+                <div className="status-update-section">
+                  <h3>Update Incident Status</h3>
+                  <div className="status-buttons">
+                    <button
+                      className="cta-button secondary"
+                      onClick={() => handleStatusUpdate("On the Way")}
+                      disabled={
+                        incident.status === "On the Way" ||
+                        incident.status === "Arrived" ||
+                        incident.status === "Completed"
+                      }
+                    >
+                      On the Way
+                    </button>
+                    <button
+                      className="cta-button secondary"
+                      onClick={() => handleStatusUpdate("Arrived")}
+                      disabled={
+                        incident.status === "Arrived" ||
+                        incident.status === "Completed"
+                      }
+                    >
+                      Arrived
+                    </button>
+                    <button
+                      className="cta-button secondary"
+                      onClick={() => handleStatusUpdate("Completed")}
+                      disabled={incident.status === "Completed"}
+                    >
+                      Completed
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {incident.photoUrls.length > 0 && (
@@ -364,7 +378,10 @@ export default function IncidentDetails() {
                     )}
                     {userLocation && (
                       <Marker
-                        position={[userLocation.latitude, userLocation.longitude]}
+                        position={[
+                          userLocation.latitude,
+                          userLocation.longitude,
+                        ]}
                         icon={userMarkerIcon}
                       />
                     )}
@@ -372,29 +389,6 @@ export default function IncidentDetails() {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="donation-section">
-            <h2>Support Relief Efforts</h2>
-            <form className="donation-form">
-              <div className="form-group">
-                <label htmlFor="donationAmount">Donation Amount (NGN)</label>
-                <input
-                  type="number"
-                  id="donationAmount"
-                  value={donationAmount || ""}
-                  onChange={(e) => setDonationAmount(Number(e.target.value))}
-                  min="100"
-                  placeholder="Enter amount in NGN"
-                  required
-                />
-              </div>
-              <PaystackButton
-                {...paystackConfig}
-                className="cta-button primary"
-                disabled={!userEmail || donationAmount < 100}
-              />
-            </form>
           </div>
         </div>
       </section>
@@ -426,10 +420,18 @@ export default function IncidentDetails() {
             <div className="footer-section">
               <h3>Quick Links</h3>
               <ul>
-                <li><Link href="/#home">Home</Link></li>
-                <li><Link href="/#features">Features</Link></li>
-                <li><Link href="/#about">About</Link></li>
-                <li><Link href="/#contact">Contact</Link></li>
+                <li>
+                  <Link href="/#home">Home</Link>
+                </li>
+                <li>
+                  <Link href="/#features">Features</Link>
+                </li>
+                <li>
+                  <Link href="/#about">About</Link>
+                </li>
+                <li>
+                  <Link href="/#contact">Contact</Link>
+                </li>
               </ul>
             </div>
             <div className="footer-section">
@@ -438,7 +440,9 @@ export default function IncidentDetails() {
               <p>Phone: +1 (800) 123-4567</p>
             </div>
           </div>
-          <p className="footer-bottom">© 2025 Milson Response. All rights reserved.</p>
+          <p className="footer-bottom">
+            © 2025 Milson Response. All rights reserved.
+          </p>
         </div>
       </footer>
     </>
